@@ -1,5 +1,17 @@
 # Feedback — Atelier 1 (Moad RAZZAKI)
 
+> **Mise à jour** : le fichier a été déplacé dans `00_Concepts/` ; seule la
+> fin de ligne (CRLF→LF) a changé. Contenu identique, évaluation maintenue.
+
+---
+*Évalué sur le commit `b27de7a` (fichier `00_Concepts/Atelier1.py`).*
+
+---
+
+## Évaluation précédente (obsolète, commit `22bf8ea`)
+
+# Feedback — Atelier 1 (Moad RAZZAKI)
+
 > **Évaluation à jour** suite à la modification du source. Tu as
 > intégré toutes les remarques du feedback précédent — excellent.
 
@@ -76,3 +88,4 @@ Le `sorted()` est facultatif mais rend la sortie reproductible.
   sans argument → `IndexError`).
 - Style très Pythonique avec les compréhensions. À garder, juste
   l'enrichir avec le set pour la dédup.
+
