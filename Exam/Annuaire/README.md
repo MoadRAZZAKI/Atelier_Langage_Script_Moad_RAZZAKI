@@ -149,7 +149,7 @@ Le serveur utilise du **JSON délimité par des sauts de ligne** (un objet JSON 
 
 **Pourquoi le Protocole C plutôt que les alternatives ?**
 
-| Critère | Protocole C (JSON lines) | Protocole A (texte brut) | Protocole B (HTTP/REST) |
+| Critère | JSON lines | texte brut | HTTP/REST |
 |---------|--------------------------|--------------------------|-------------------------|
 | Données structurées | Oui — types JSON natifs | Non — parsing manuel | Oui |
 | Délimitation | Saut de ligne (trivial) | Personnalisée | En-têtes HTTP |

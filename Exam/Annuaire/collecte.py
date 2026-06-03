@@ -36,12 +36,6 @@ def resoudre_ip(hote: str) -> str | None:
         )
         return None
 
-    # Collect every IPv4 found in the output, in order.
-    # Strategy: the DNS server address (if IPv4) appears in the first ~3 lines;
-    # the resolved address appears later.  On French/localised Windows the
-    # section headers are translated ("Adresse :", "Réponse ne faisant pas
-    # autorité :"), so we cannot rely on keyword matching.  Instead we harvest
-    # all IPv4s and keep track of which belong to the server header block.
     server_ips: set[str] = set()
     answer_ips: list[str] = []
 
@@ -58,7 +52,6 @@ def resoudre_ip(hote: str) -> str | None:
             logger.debug("Resolved %s -> %s", hote, ip)
             return ip
 
-    # Last resort: any IPv4 not from the server header
     all_ips = [m.group(1) for m in _IPV4_RE.finditer(result.stdout)]
     for ip in reversed(all_ips):
         if ip not in server_ips:
