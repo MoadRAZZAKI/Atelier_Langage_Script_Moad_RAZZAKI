@@ -161,4 +161,4 @@ Le serveur utilise du **JSON délimité par des sauts de ligne** (un objet JSON 
 JSON lines apporte la structure de HTTP sans la lourdeur d'une pile HTTP,
 et la lisibilité du texte brut sans le parsing fragile. Chaque commande est un
 objet JSON autonome, ce qui rend le protocole sans état, facile à tester et
-simple à étendre.
+simple à étendre.  
