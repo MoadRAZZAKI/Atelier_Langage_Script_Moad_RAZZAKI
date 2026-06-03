@@ -36,35 +36,51 @@ def resoudre_ip(hote: str) -> str | None:
         )
         return None
 
-    lines = result.stdout.splitlines()
+    # Collect every IPv4 found in the output, in order.
+    # Strategy: the DNS server address (if IPv4) appears in the first ~3 lines;
+    # the resolved address appears later.  On French/localised Windows the
+    # section headers are translated ("Adresse :", "Réponse ne faisant pas
+    # autorité :"), so we cannot rely on keyword matching.  Instead we harvest
+    # all IPv4s and keep track of which belong to the server header block.
+    server_ips: set[str] = set()
+    answer_ips: list[str] = []
 
-    in_answer = False
-    for line in lines:
-        if "Non-authoritative answer" in line:
-            in_answer = True
-        if in_answer:
-            match = _IPV4_RE.search(line)
-            if match:
-                logger.debug("Resolved %s -> %s", hote, match.group(1))
-                return match.group(1)
+    for i, line in enumerate(result.stdout.splitlines()):
+        for m in _IPV4_RE.finditer(line):
+            ip = m.group(1)
+            if i < 3:           # first 3 lines = server info block
+                server_ips.add(ip)
+            else:
+                answer_ips.append(ip)
 
+    for ip in answer_ips:
+        if ip not in server_ips:
+            logger.debug("Resolved %s -> %s", hote, ip)
+            return ip
 
-    for line in lines:
-        if "Address" in line and "#" not in line:
-            match = _IPV4_RE.search(line)
-            if match:
-                logger.debug("Resolved %s -> %s (fallback)", hote, match.group(1))
-                return match.group(1)
+    # Last resort: any IPv4 not from the server header
+    all_ips = [m.group(1) for m in _IPV4_RE.finditer(result.stdout)]
+    for ip in reversed(all_ips):
+        if ip not in server_ips:
+            logger.debug("Resolved %s -> %s (last-resort)", hote, ip)
+            return ip
 
     logger.warning("Could not extract IPv4 from nslookup output for %s", hote)
     return None
+
+
+def _whois_cmd(hote: str) -> list[str]:
+    """Return the whois command to use, falling back to 'wsl whois' on Windows."""
+    if platform.system() == "Windows":
+        return ["wsl", "whois", hote]
+    return ["whois", hote]
 
 
 def interroger_whois(hote: str) -> tuple[str | None, str | None]:
 
     try:
         result = subprocess.run(
-            ["whois", hote],
+            _whois_cmd(hote),
             capture_output=True,
             text=True,
             timeout=10.0,
@@ -73,7 +89,9 @@ def interroger_whois(hote: str) -> tuple[str | None, str | None]:
         logger.warning("whois timed out for %s", hote)
         return None, None
     except FileNotFoundError:
-        logger.error("whois binary not found — install with: apt install whois")
+        logger.error(
+            "whois binary not found — on Linux: apt install whois / on Windows: install WSL or Sysinternals whois"
+        )
         return None, None
 
     if result.returncode != 0:
